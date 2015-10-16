@@ -13,6 +13,7 @@ from scipy import *
 class laplaceSolver(object):
     
     def __init__(self,bc,dx):
+        ## TODO: CHANGE GRID FROM BEING IN INIT METHOD TO CALL, EASIER TO UPDATE
         self.bc = bc
         self.dx = dx
         [self.N, self.M] = bc.shape
@@ -48,7 +49,7 @@ class laplaceSolver(object):
         self.bc[1:-1,1:-1] = U
         return self.bc
  
-M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])
-solved = laplaceSolver(M,1/3.)
-U = solved('Dirichlet')
-print(U)
+#M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])
+#solved = laplaceSolver(M,1/3.)
+#U = solved('Dirichlet')
+#print(U)
