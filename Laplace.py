@@ -21,19 +21,19 @@ class laplaceSolver(object):
         self.N = self.N-2
         self.M = self.M-2
         
-    def __call__(self,condition):
-        self._setRhs(condition)
+    def __call__(self,conditionType):
+        self._setRhs(conditionType)
         return self._update()
 
-    def _setRhs(self,condition):
-        if condition == 'Dirichlet':
+    def _setRhs(self,conditionType):
+        if conditionType == 'Dirichlet':
             self.rhs = zeros([self.N,self.M])
             self.rhs[0,:] =- self.bc[0,1:-1]
             self.rhs[-1,:] =- self.bc[-1,1:-1]
             self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
             self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
             self.rhs = self.rhs/self.dx**2
-        if condition == 'Neumann':
+        if conditionType == 'Neumann':
             self.rhs
     def _update(self):
         self.rhs = self.rhs.reshape(self.M*self.N)
