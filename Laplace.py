@@ -10,7 +10,7 @@ from mpi4py import MPI
 from scipy import *
 
 
-class solver(object):
+class laplaceSolver(object):
     
     def __init__(self,bc,dx):
         self.bc = bc
@@ -21,17 +21,21 @@ class solver(object):
         self.N = self.N-2
         self.M = self.M-2
         
-    def __call__(self):
-        self.rhs = zeros([self.N,self.M])
-        self.rhs[0,:] =- self.bc[0,1:-1]
-        self.rhs[-1,:] =- self.bc[-1,1:-1]
-        self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
-        self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
-        self.rhs = self.rhs/self.dx**2
-        return self._createA()
+    def __call__(self,condition):
+        self._setRhs(condition)
+        return self._update()
 
-        
-    def _createA(self):
+    def _setRhs(self,condition):
+        if condition == 'Dirichlet':
+            self.rhs = zeros([self.N,self.M])
+            self.rhs[0,:] =- self.bc[0,1:-1]
+            self.rhs[-1,:] =- self.bc[-1,1:-1]
+            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
+            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
+            self.rhs = self.rhs/self.dx**2
+        if condition == 'Neumann':
+            self.rhs
+    def _update(self):
         self.rhs = self.rhs.reshape(self.M*self.N)
         sub = ones([1,self.M-1])
         main = (-4*ones([1,self.M]))
@@ -43,9 +47,8 @@ class solver(object):
         U = U.reshape(self.N,self.M)
         self.bc[1:-1,1:-1] = U
         return self.bc
-        
-        return U
+ 
 M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])
-solved = solver(M,1/3.)
-U = solved()
+solved = laplaceSolver(M,1/3.)
+U = solved('Dirichlet')
 print(U)
