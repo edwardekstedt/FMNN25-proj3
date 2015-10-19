@@ -12,17 +12,19 @@ from scipy import *
 
 class laplaceSolver(object):
     
-    def __init__(self,bc,dx):
+    def __init__(self,dx):
         ## TODO: CHANGE GRID FROM BEING IN INIT METHOD TO CALL, EASIER TO UPDATE
-        self.bc = bc
+        #self.bc = bc
         self.dx = dx
+
+        
+    def __call__(self,bc,conditionType):
+        self.bc = bc
         [self.N, self.M] = bc.shape
         #N = AMOUNT OF ROWS
         #M = AMOUNT OF COLUMNS
         self.N = self.N-2
         self.M = self.M-2
-        
-    def __call__(self,conditionType):
         self._setRhs(conditionType)
         return self._update()
 
@@ -43,7 +45,8 @@ class laplaceSolver(object):
         D = diagflat(main) + diagflat(sub,1) + diagflat(sub,-1)
         BL = kron(eye(self.N),D)
         T = BL+diagflat(ones([1,self.M*(self.N-1)]),-self.M)+diagflat(ones([1,self.M*(self.N-1)]),self.M)
-        T = T*1/self.dx**2      
+        T = T*1/self.dx**2  
+        print(T)
         U = linalg.solve(T,self.rhs)
         U = U.reshape(self.N,self.M)
         self.bc[1:-1,1:-1] = U
