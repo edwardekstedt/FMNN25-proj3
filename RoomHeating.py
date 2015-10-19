@@ -4,11 +4,12 @@ Created on Fri Oct 16 22:16:08 2015
 
 @author: Edward
 """
+from mpl_toolkits.mplot3d import Axes3D
 from numpy import *
 from mpi4py import MPI
 from Laplace import *
-
-
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 class roomHeating(object):
     def __init__(self,dx):
@@ -22,18 +23,43 @@ class roomHeating(object):
         self.w = w
         self.n = n
         self.updateU()
-
+        self.plot()
 
     def updateU(self):
         ## TODO: INSERT MPI UPDATING CODE
         for i in range(self.n):
             lrOld = self.largeRoom.copy()
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
-            self.largeRoom = self.w*self.largeRoom +(1-self.w)*lrOld
-            
-            
-       
+            self.largeRoom = self.smoothing(self.largeRoom,lrOld)
+            smWOLD = self.smallRoomW.copy()
+            self.smallRoomW = self.solver(self.smallRoomW,'Neumann')
+            self.smallRoomW = self.smoothing(self.smallRoomW,smWOLD)
+            smEOLD = self.smallRoomE.copy()
+            self.smallRoomE = self.solver(self.smallRoomE,'Neumann')
+            self.smallRoomE = self.smoothing(self.smallRoomE,smEOLD)
+    
+    def smoothing(self,room,roomOld):
+        return self.w*room+(1-self.w)*roomOld
         
+        
+    def plot(self):
+        pM = self.plotMatrix()
+        plt.close('all')
+        plt.imshow(pM)
+        plt.colorbar()
+    def plotMatrix(self):
+        dim1,dim2 = self.smallRoomE.shape
+        dim1 = dim1-1
+        emptySpace= zeros([dim1,dim2])
+        emptySpace[:,:] = None
+        emptySpace[:,0] = 15
+        self.smallRoomE = vstack([self.smallRoomE,emptySpace])
+        emptySpace = fliplr(emptySpace)
+        self.smallRoomW = vstack([emptySpace,self.smallRoomW])
+        plotRoom= hstack([self.smallRoomW,self.largeRoom[:,1:-1],self.smallRoomE])
+        return plotRoom
+
+    
     def initRoom(self,dx,size,dir=None):
         if size == 'small':
             X = 1
@@ -67,6 +93,6 @@ class roomHeating(object):
             grid[(len(grid)-1)/2:,-1] = gN
         return grid
         
-X = roomHeating(1/3.)
+X = roomHeating(1/20.)
 X(0.8,5)
       

@@ -36,8 +36,16 @@ class laplaceSolver(object):
             self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
             self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
             self.rhs = self.rhs/self.dx**2
-        if conditionType == 'Neumann':
-            self.rhs
+        elif conditionType == 'Neumann':
+            print('Not yet implemented, assuming Dirichlet')
+            self.rhs = zeros([self.N,self.M])
+            self.rhs[0,:] =- self.bc[0,1:-1]
+            self.rhs[-1,:] =- self.bc[-1,1:-1]
+            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
+            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
+            self.rhs = self.rhs/self.dx**2
+        else:
+            raise NameError('Condition must be either "Dirichlet" or "Neumann".')
     def _update(self):
         self.rhs = self.rhs.reshape(self.M*self.N)
         sub = ones([1,self.M-1])
