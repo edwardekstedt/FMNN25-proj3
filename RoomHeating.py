@@ -11,52 +11,62 @@ from Laplace import *
 
 
 class roomHeating(object):
-    def __init__(self,dx,w,n):
+    def __init__(self,dx):
         ## TODO: CLEAN UP CODE AND MAKE ROOM FOR UPDATING GRID
         self.dx = dx
+        self.largeRoom = self.initRoom(self.dx,'large')
+        self.smallRoomW = self.initRoom(self.dx,'small','west')
+        self.smallRoomE = self.initRoom(self.dx,'small','east')
+        self.solver = laplaceSolver(dx)
+    def __call__(self,w,n):
         self.w = w
         self.n = n
-        self.laplIter()
-    
-    
-    def laplIter(self):
-        self.largeRoom = self.initlargeroom(self.dx)
-        self.smallRoomW = self.initsmallroom(self.dx,'west')
-        self.smallRoomE = self.initsmallroom(self.dx,'east')
         self.updateU()
-        
+
+
     def updateU(self):
         ## TODO: INSERT MPI UPDATING CODE
-        U = 1
+        for i in range(self.n):
+            lrOld = self.largeRoom.copy()
+            self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
+            self.largeRoom = self.w*self.largeRoom +(1-self.w)*lrOld
+            
+            
+       
         
-    def initsmallroom(self,dx,dir):
-        X = 1
-        Y = 1
-        
-        grid = zeros([X/(dx)+1,Y/(dx)+1])
-        grid = self.initbc(grid,'small',dir)
-        return grid
-    
-    def initbc(self,grid,size,direction=None):
+    def initRoom(self,dx,size,dir=None):
         if size == 'small':
-            if direction == 'west':
-                grid[:,0] = 40
-            elif direction == 'east':
-                grid[:,-1] = 40
-            grid[0,:] = 15
-            grid[-1,:] = 15
+            X = 1
+            Y = 1  
+        elif size == 'large':
+            X = 2
+            Y = 1
         else:
-            grid[0,:] = 5
-            grid[-1,:] = 40
-            grid[0:(len(grid)-1)/2,0] = 15
-            grid[(len(grid)-1)/2:,-1] = 15
-        return grid
-        
-        
-    def initlargeroom(self,dx):
-        X = 2
-        Y = 1
+            raise NameError('size must be "small" or "large"')
         grid = zeros([X/(dx)+1,Y/(dx)+1])
-        grid = self.initbc(grid,'large')
+        grid = self._initbc(grid,size,dir)
         return grid
 
+        
+    
+    def _initbc(self,grid,size,dir=None):
+        gH = 40
+        gW = 5
+        gN = 15
+        if size == 'small':
+            if dir == 'west':
+                grid[:,0] = gH
+            elif dir == 'east':
+                grid[:,-1] = gH
+            grid[0,:] = gN
+            grid[-1,:] = gN
+        else:
+            grid[0,:] = gW
+            grid[-1,:] = gH
+            grid[0:(len(grid)-1)/2,0] = gN
+            grid[(len(grid)-1)/2:,-1] = gN
+        return grid
+        
+X = roomHeating(1/3.)
+X(0.8,5)
+      

@@ -46,7 +46,6 @@ class laplaceSolver(object):
         BL = kron(eye(self.N),D)
         T = BL+diagflat(ones([1,self.M*(self.N-1)]),-self.M)+diagflat(ones([1,self.M*(self.N-1)]),self.M)
         T = T*1/self.dx**2  
-        print(T)
         U = linalg.solve(T,self.rhs)
         U = U.reshape(self.N,self.M)
         self.bc[1:-1,1:-1] = U
