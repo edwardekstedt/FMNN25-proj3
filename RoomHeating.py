@@ -80,18 +80,20 @@ class roomHeating(object):
         gW = 5
         gN = 15
         if size == 'small':
-            if dir == 'west':
-                grid[:,0] = gH
-            elif dir == 'east':
-                grid[:,-1] = gH
+            grid[:,0] = gH
             grid[0,:] = gN
             grid[-1,:] = gN
+            if dir == 'west':
+                return grid
+            elif dir == 'east':
+                grid = fliplr(grid)
+                return grid
         else:
             grid[0,:] = gW
             grid[-1,:] = gH
             grid[0:(len(grid)-1)/2,0] = gN
             grid[(len(grid)-1)/2:,-1] = gN
-        return grid
+            return grid
         
 X = roomHeating(1/20.)
 X(0.8,5)
