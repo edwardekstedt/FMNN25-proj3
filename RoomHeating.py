@@ -21,24 +21,22 @@ class roomHeating(object):
         self.solver = laplaceSolver(dx)
         
         
-    def __call__(self,w,n):
+    def __call__(self,w,n,room):
+        self.room = room
         self.w = w
         self.n = n
         self.updateU()
-        self.plot()
-
+        #self.plot()
+        if self.room == 'Large':
+            return self.largeRoom
     def updateU(self):
         ## TODO: INSERT MPI UPDATING CODE
-        for i in range(self.n):
-            lrOld = self.largeRoom.copy()
+        if self.room == 'Large':
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
-            self.largeRoom = self.smoothing(self.largeRoom,lrOld)
-            smWOLD = self.smallRoomW.copy()
-            self.smallRoomW = self.solver(self.smallRoomW,'Neumann','east')
-            self.smallRoomW = self.smoothing(self.smallRoomW,smWOLD)
-            smEOLD = self.smallRoomE.copy()
+        elif self.room == 'SmallW':
+            self.smallRoomW = self.solver(self.smallRoomW, 'Neumann','east')
+        elif self.room == 'SmallE':
             self.smallRoomE = self.solver(self.smallRoomE,'Neumann','west')
-            self.smallRoomE = self.smoothing(self.smallRoomE,smEOLD)
     
     def smoothing(self,room,roomOld):
         return self.w*room+(1-self.w)*roomOld
@@ -99,6 +97,3 @@ class roomHeating(object):
             grid[(len(grid)-1)/2:,-1] = gN
             return grid
         
-X = roomHeating(1/20.)
-X(0.8,5)
-      
