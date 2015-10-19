@@ -18,17 +18,17 @@ class laplaceSolver(object):
         self.dx = dx
 
         
-    def __call__(self,bc,conditionType):
+    def __call__(self,bc,conditionType,dir=None):
         self.bc = bc
         [self.N, self.M] = bc.shape
         #N = AMOUNT OF ROWS
         #M = AMOUNT OF COLUMNS
         self.N = self.N-2
         self.M = self.M-2
-        self._setRhs(conditionType)
-        return self._update()
+        self._setRhs(conditionType,dir)
+        return self._update(conditionType,dir)
 
-    def _setRhs(self,conditionType):
+    def _setRhs(self,conditionType,direction):
         if conditionType == 'Dirichlet':
             self.rhs = zeros([self.N,self.M])
             self.rhs[0,:] =- self.bc[0,1:-1]
@@ -39,14 +39,22 @@ class laplaceSolver(object):
         elif conditionType == 'Neumann':
             print('Not yet implemented, assuming Dirichlet')
             self.rhs = zeros([self.N,self.M])
+            if direction == 'east':
+                pass
+            elif direction =='north':
+                self.bc=rot90(self.bc,1)
+            elif direction =='west':
+                self.bc = rot90(self.bc,2)
+            elif direction =='south':
+                self.bc = rot90(self.bc,3)
             self.rhs[0,:] =- self.bc[0,1:-1]
             self.rhs[-1,:] =- self.bc[-1,1:-1]
             self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
-            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
+            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1] ## Change to Neumann
             self.rhs = self.rhs/self.dx**2
         else:
             raise NameError('Condition must be either "Dirichlet" or "Neumann".')
-    def _update(self):
+    def _update(self,conditionType,direction):
         self.rhs = self.rhs.reshape(self.M*self.N)
         sub = ones([1,self.M-1])
         main = (-4*ones([1,self.M]))
@@ -57,6 +65,15 @@ class laplaceSolver(object):
         U = linalg.solve(T,self.rhs)
         U = U.reshape(self.N,self.M)
         self.bc[1:-1,1:-1] = U
+        if conditionType == 'Neumann':
+            if direction == 'east':
+                pass
+            elif direction =='north':
+                self.bc=rot90(self.bc,3)
+            elif direction =='west':
+                self.bc = rot90(self.bc,2)
+            elif direction =='south':
+                self.bc = rot90(self.bc,1)
         return self.bc
  
 #M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])

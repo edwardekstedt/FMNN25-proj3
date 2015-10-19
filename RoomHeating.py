@@ -19,6 +19,8 @@ class roomHeating(object):
         self.smallRoomW = self.initRoom(self.dx,'small','west')
         self.smallRoomE = self.initRoom(self.dx,'small','east')
         self.solver = laplaceSolver(dx)
+        
+        
     def __call__(self,w,n):
         self.w = w
         self.n = n
@@ -32,10 +34,10 @@ class roomHeating(object):
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
             self.largeRoom = self.smoothing(self.largeRoom,lrOld)
             smWOLD = self.smallRoomW.copy()
-            self.smallRoomW = self.solver(self.smallRoomW,'Neumann')
+            self.smallRoomW = self.solver(self.smallRoomW,'Neumann','east')
             self.smallRoomW = self.smoothing(self.smallRoomW,smWOLD)
             smEOLD = self.smallRoomE.copy()
-            self.smallRoomE = self.solver(self.smallRoomE,'Neumann')
+            self.smallRoomE = self.solver(self.smallRoomE,'Neumann','west')
             self.smallRoomE = self.smoothing(self.smallRoomE,smEOLD)
     
     def smoothing(self,room,roomOld):
@@ -47,6 +49,8 @@ class roomHeating(object):
         plt.close('all')
         plt.imshow(pM)
         plt.colorbar()
+        
+        
     def plotMatrix(self):
         dim1,dim2 = self.smallRoomE.shape
         dim1 = dim1-1
