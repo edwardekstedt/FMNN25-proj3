@@ -12,30 +12,45 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 class roomHeating(object):
-    def __init__(self,dx):
-        ## TODO: CLEAN UP CODE AND MAKE ROOM FOR UPDATING GRID
+    def __init__(self,dx,rank=None):
+        ## TODO: CLEAN UP CODE
+        if rank == 0:
+            self.largeRoom = self.initRoom(self.dx,'large')
+        elif rank == 1:
+            self.smallRoomW = self.initRoom(self.dx,'small','west')
+        elif rank == 2:
         self.dx = dx
+        else:
         self.largeRoom = self.initRoom(self.dx,'large')
         self.smallRoomW = self.initRoom(self.dx,'small','west')
         self.smallRoomE = self.initRoom(self.dx,'small','east')
         self.solver = laplaceSolver(dx)
         
         
-    def __call__(self,w,n,room):
+    def __call__(self,room,bc = None):
         self.room = room
-        self.w = w
-        self.n = n
+        self.bc = bc
         self.updateU()
         #self.plot()
         if self.room == 'Large':
             return self.largeRoom
+        if self.room == 'SmallW':
+            return self.smallRoomW
+        if self.room == 'SmallE':
+            return self.smallRoomE
     def updateU(self):
-        ## TODO: INSERT MPI UPDATING CODE
+        ## TODO
         if self.room == 'Large':
+            if self.bc != None:
+                self.largeRoom = self.bc
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
         elif self.room == 'SmallW':
+            if self.bc != None:
+                self.smallRoomW  = self.bc
             self.smallRoomW = self.solver(self.smallRoomW, 'Neumann','east')
         elif self.room == 'SmallE':
+            if self.bc != None:
+                self.smallRoomE = self.bc
             self.smallRoomE = self.solver(self.smallRoomE,'Neumann','west')
     
     def smoothing(self,room,roomOld):
@@ -43,10 +58,12 @@ class roomHeating(object):
         
         
     def plot(self):
+        plt.figure()
         pM = self.plotMatrix()
         plt.close('all')
         plt.imshow(pM)
         plt.colorbar()
+        plt.show()
         
         
     def plotMatrix(self):
@@ -82,18 +99,20 @@ class roomHeating(object):
         gW = 5
         gN = 15
         if size == 'small':
-            grid[:,0] = gH
             grid[0,:] = gN
             grid[-1,:] = gN
+            grid[:,-1] = gN
+            grid[:,0] = gH
             if dir == 'west':
                 return grid
             elif dir == 'east':
                 grid = fliplr(grid)
                 return grid
         else:
-            grid[0,:] = gW
-            grid[-1,:] = gH
-            grid[0:(len(grid)-1)/2,0] = gN
-            grid[(len(grid)-1)/2:,-1] = gN
+            grid[:,0]=gN
+            grid[: ,-1] = gN
+            grid[0,:] = gH
+            grid[-1,:] = gW
+            print grid
             return grid
         

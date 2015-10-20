@@ -21,7 +21,6 @@ class laplaceSolver(object):
     def __call__(self,bc,conditionType,dir=None):
         self.bc = bc
         [self.N, self.M] = bc.shape
-        print(bc.shape)
         #N = AMOUNT OF ROWS
         #M = AMOUNT OF COLUMNS
         self.N = self.N-2
@@ -88,7 +87,7 @@ class laplaceSolver(object):
                 self.bc = rot90(self.bc,1)
         return self.bc
  
-M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])
-solved = laplaceSolver(1/3.)
-U = solved(M, 'Neumann', 'east')
-print(U)
+#M = array([[40.,40,40,40],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[15,0,0,15],[5,5,5,5]])
+#solved = laplaceSolver(1/3.)
+#U = solved(M, 'Neumann', 'east')
+#print(U)
