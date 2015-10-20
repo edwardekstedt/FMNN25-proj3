@@ -6,49 +6,49 @@ Created on Fri Oct 16 22:16:08 2015
 """
 from mpl_toolkits.mplot3d import Axes3D
 from numpy import *
-from mpi4py import MPI
 from Laplace import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
 class roomHeating(object):
     def __init__(self,dx,rank=None):
+        self.dx = dx
+        self.rank = rank
         ## TODO: CLEAN UP CODE
         if rank == 0:
             self.largeRoom = self.initRoom(self.dx,'large')
         elif rank == 1:
             self.smallRoomW = self.initRoom(self.dx,'small','west')
         elif rank == 2:
-        self.dx = dx
+            self.smallRoomE = self.initRoom(self.dx,'small','east')
         else:
-        self.largeRoom = self.initRoom(self.dx,'large')
-        self.smallRoomW = self.initRoom(self.dx,'small','west')
-        self.smallRoomE = self.initRoom(self.dx,'small','east')
+            self.largeRoom = self.initRoom(self.dx,'large')
+            self.smallRoomW = self.initRoom(self.dx,'small','west')
+            self.smallRoomE = self.initRoom(self.dx,'small','east')
         self.solver = laplaceSolver(dx)
         
         
-    def __call__(self,room,bc = None):
-        self.room = room
+    def __call__(self,bc = None):
         self.bc = bc
         self.updateU()
         #self.plot()
-        if self.room == 'Large':
+        if self.rank == 0:
             return self.largeRoom
-        if self.room == 'SmallW':
+        if self.rank == 1:
             return self.smallRoomW
-        if self.room == 'SmallE':
+        if self.rank == 2:
             return self.smallRoomE
     def updateU(self):
         ## TODO
-        if self.room == 'Large':
+        if self.rank == 0:
             if self.bc != None:
                 self.largeRoom = self.bc
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
-        elif self.room == 'SmallW':
+        elif self.rank == 1:
             if self.bc != None:
                 self.smallRoomW  = self.bc
             self.smallRoomW = self.solver(self.smallRoomW, 'Neumann','east')
-        elif self.room == 'SmallE':
+        elif self.rank ==2:
             if self.bc != None:
                 self.smallRoomE = self.bc
             self.smallRoomE = self.solver(self.smallRoomE,'Neumann','west')
@@ -56,7 +56,26 @@ class roomHeating(object):
     def smoothing(self,room,roomOld):
         return self.w*room+(1-self.w)*roomOld
         
-        
+    def setRoom(self,loc,room):
+        if loc == 'Large':
+            self.largeRoom = room
+        elif loc == 'SmallE':
+            self.smallRoomE = room
+        elif loc == 'SmallW':
+            self.smallRoomW = room
+        else:
+            raise NameError('Roomtype does not exist, use Large, SmallE or SmallW')
+    
+    def getRoom(self,loc):
+        if loc == 'Large':
+            return self.largeRoom
+        elif loc == 'SmallE':
+            return self.smallRoomE
+        elif loc == 'SmallW':
+            return self.smallRoomW
+        else:
+            raise NameError('Roomtype does not exist, use Large, SmallE or SmallW')
+    
     def plot(self):
         plt.figure()
         pM = self.plotMatrix()
@@ -113,6 +132,5 @@ class roomHeating(object):
             grid[: ,-1] = gN
             grid[0,:] = gH
             grid[-1,:] = gW
-            print grid
             return grid
         
