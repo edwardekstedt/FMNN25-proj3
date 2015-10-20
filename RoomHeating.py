@@ -44,15 +44,15 @@ class roomHeating(object):
     def updateU(self):
         ## TODO
         if self.rank == 0:
-            if self.bc != None:
+            if self.bc is not None:
                 self.largeRoom = self.bc
             self.largeRoom = self.solver(self.largeRoom,'Dirichlet')
         elif self.rank == 1:
-            if self.bc != None:
+            if self.bc is not None:
                 self.smallRoomW  = self.bc
             self.smallRoomW = self.solver(self.smallRoomW, 'Neumann','east')
         elif self.rank ==2:
-            if self.bc != None:
+            if self.bc is not None:
                 self.smallRoomE = self.bc
             self.smallRoomE = self.solver(self.smallRoomE,'Neumann','west')
     
