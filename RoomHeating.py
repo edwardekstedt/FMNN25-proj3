@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 class roomHeating(object):
-    def __init__(self,dx,rank=None):
+    def __init__(self,dx,rank=None,gH = 40,gN =15, gW = 5):
+        self.gH = gH
+        self.gN = gN
+        self.gW = gW
         self.dx = dx
         self.rank = rank
         ## TODO: CLEAN UP CODE
@@ -114,23 +117,20 @@ class roomHeating(object):
         
     
     def _initbc(self,grid,size,dir=None):
-        gH = 40
-        gW = 5
-        gN = 15
         if size == 'small':
-            grid[0,:] = gN
-            grid[-1,:] = gN
-            grid[:,-1] = gN
-            grid[:,0] = gH
+            grid[0,:] = self.gN
+            grid[-1,:] = self.gN
+            grid[:,-1] = self.gN
+            grid[:,0] = self.gH
             if dir == 'west':
                 return grid
             elif dir == 'east':
                 grid = fliplr(grid)
                 return grid
         else:
-            grid[:,0]=gN
-            grid[: ,-1] = gN
-            grid[0,:] = gH
-            grid[-1,:] = gW
+            grid[:,0]=self.gN
+            grid[: ,-1] = self.gN
+            grid[0,:] = self.gH
+            grid[-1,:] = self.gW
             return grid
         
