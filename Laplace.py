@@ -10,10 +10,12 @@ from numpy import *
 
 class laplaceSolver(object):
     
+    #Initialize the solver by defining the grid size.
     def __init__(self,dx):
         self.dx = dx
 
-        
+    #Calling the solver with the boundary condition and the condition type, 
+    #if condition type is Neumann, dir specifices what wall is of Neumann type.
     def __call__(self,bc,conditionType,dir=None):
         self.bc = bc
         [self.N, self.M] = bc.shape
@@ -27,8 +29,9 @@ class laplaceSolver(object):
         else:
             raise NameError('Condition must be either "Dirichlet" or "Neumann".')
         self._setRhs(conditionType,dir)
-        return self._update(conditionType,dir)
-
+        return self._solve(conditionType,dir)
+    
+    #Setting the correct right hand side of the Ax=b equation.
     def _setRhs(self,conditionType,direction):
         self.rhs = zeros([self.N, self.M])    
         if conditionType == 'Dirichlet':
@@ -51,8 +54,8 @@ class laplaceSolver(object):
             self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]/self.dx**2
             self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]/self.dx
        
-    
-    def _update(self,conditionType,direction):
+    #Solves the equation using the linalg.solve method, the gridpoints are turned into an array with lexiographic ordering.
+    def _solve(self,conditionType,direction):
         self.rhs = self.rhs.reshape(self.M*self.N)
         sub = ones([1,self.M-1])           
         if conditionType == 'Dirichlet':
@@ -63,6 +66,7 @@ class laplaceSolver(object):
         A = (kron(eye(self.N),T)+diagflat(ones([1,self.M*(self.N-1)]),-self.M)+diagflat(ones([1,self.M*(self.N-1)]),self.M))/self.dx**2
         U = linalg.solve(A,self.rhs)
         U = U.reshape(self.N,self.M)
+        #Putting the solution on the inner points together with the conditions on the boundary.
         if conditionType == 'Dirichlet':
             self.bc[1:-1,1:-1] = U
         elif conditionType == 'Neumann':
