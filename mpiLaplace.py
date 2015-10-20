@@ -13,16 +13,22 @@ rank = comm.Get_rank()
 
 n = int(sys.argv[1])
 dx = float(sys.argv[2])
-if float(sys.argv[3]):
+if len(sys.argv)>3:
     omega = float(sys.argv[3])
 else:
     omega = 0.8
+if len(sys.argv) >6:
+    gH = float(sys.argv[4])
+    gN = float(sys.argv[5])
+    gW = float(sys.argv[6])
+    room = RoomHeating.roomHeating(dx,rank,gH,gN,gW)
+else:
+    room = RoomHeating.roomHeating(dx,rank)
 bcW = numpy.zeros([int(1/dx-1),1])
 bcE = numpy.zeros([int(1/dx-1),1])
 neumannW = numpy.zeros([int(1/dx-1),1])
 neumannE = numpy.zeros([int(1/dx-1),1])
-print(rank)
-room = RoomHeating.roomHeating(dx,rank)
+
 N = 2/(dx)+1
 SmallE = numpy.zeros([N/2+1,N/2+1])
 SmallW = numpy.zeros([N/2+1,N/2+1])

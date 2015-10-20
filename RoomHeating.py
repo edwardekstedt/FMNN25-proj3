@@ -4,11 +4,11 @@ Created on Fri Oct 16 22:16:08 2015
 
 @author: Edward
 """
-from mpl_toolkits.mplot3d import Axes3D
-from numpy import *
+
+import numpy as np
 from Laplace import *
 import matplotlib.pyplot as plt
-from matplotlib import cm
+
 
 class roomHeating(object):
     def __init__(self,dx,rank=None,gH = 40,gN =15, gW = 5):
@@ -91,13 +91,13 @@ class roomHeating(object):
     def plotMatrix(self):
         dim1,dim2 = self.smallRoomE.shape
         dim1 = dim1-1
-        emptySpace= zeros([dim1,dim2])
+        emptySpace= np.zeros([dim1,dim2])
         emptySpace[:,:] = None
         emptySpace[:,0] = 15
-        self.smallRoomE = vstack([self.smallRoomE,emptySpace])
-        emptySpace = fliplr(emptySpace)
-        self.smallRoomW = vstack([emptySpace,self.smallRoomW])
-        plotRoom= hstack([self.smallRoomW,self.largeRoom[:,1:-1],self.smallRoomE])
+        self.smallRoomE = np.vstack([self.smallRoomE,emptySpace])
+        emptySpace = np.fliplr(emptySpace)
+        self.smallRoomW = np.vstack([emptySpace,self.smallRoomW])
+        plotRoom= np.hstack([self.smallRoomW,self.largeRoom[:,1:-1],self.smallRoomE])
         return plotRoom
 
     
@@ -110,7 +110,7 @@ class roomHeating(object):
             Y = 1
         else:
             raise NameError('size must be "small" or "large"')
-        grid = zeros([X/(dx)+1,Y/(dx)+1])
+        grid = np.zeros([X/(dx)+1,Y/(dx)+1])
         grid = self._initbc(grid,size,dir)
         return grid
 
@@ -125,7 +125,7 @@ class roomHeating(object):
             if dir == 'west':
                 return grid
             elif dir == 'east':
-                grid = fliplr(grid)
+                grid = np.fliplr(grid)
                 return grid
         else:
             grid[:,0]=self.gN
