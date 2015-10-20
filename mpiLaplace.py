@@ -6,7 +6,7 @@ Created on Mon Oct 19 17:17:24 2015
 """
 import sys
 from mpi4py import MPI
-import numpy
+import numpy as np
 import RoomHeating
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -24,14 +24,14 @@ if len(sys.argv) >6:
     room = RoomHeating.roomHeating(dx,rank,gH,gN,gW)
 else:
     room = RoomHeating.roomHeating(dx,rank)
-bcW = numpy.zeros([int(1/dx-1),1])
-bcE = numpy.zeros([int(1/dx-1),1])
-neumannW = numpy.zeros([int(1/dx-1),1])
-neumannE = numpy.zeros([int(1/dx-1),1])
+bcW = np.zeros([int(1/dx-1),1])
+bcE = np.zeros([int(1/dx-1),1])
+neumannW = np.zeros([int(1/dx-1),1])
+neumannE = np.zeros([int(1/dx-1),1])
 
 N = 2/(dx)+1
-SmallE = numpy.zeros([N/2+1,N/2+1])
-SmallW = numpy.zeros([N/2+1,N/2+1])
+SmallE = np.zeros([N/2+1,N/2+1])
+SmallW = np.zeros([N/2+1,N/2+1])
 for i in range(n):
 
     if rank == 2: ## Small Room East
@@ -43,9 +43,9 @@ for i in range(n):
         SmallE = (1-omega)*OldSmallE + omega*room(SmallE)
         bcE = SmallE[1:-1,0]
         if i==n-1:
-            comm.Send(numpy.ascontiguousarray(SmallE),dest=0)
+            comm.Send(np.ascontiguousarray(SmallE),dest=0)
         else:
-            comm.Send(numpy.ascontiguousarray(bcE),dest=0)
+            comm.Send(np.ascontiguousarray(bcE),dest=0)
 
 
     if rank == 1: ## Small Room West
@@ -57,9 +57,9 @@ for i in range(n):
         SmallW = (1-omega)*OldSmallW + omega*room(SmallW)
         bcW = SmallW[1:-1,-1]
         if i ==n-1:
-            comm.Send(numpy.ascontiguousarray(SmallW),dest=0)
+            comm.Send(np.ascontiguousarray(SmallW),dest=0)
         else:
-            comm.Send(numpy.ascontiguousarray(bcW),dest=0)
+            comm.Send(np.ascontiguousarray(bcW),dest=0)
 
 
     if rank == 0: ##Large Room
