@@ -32,15 +32,8 @@ class laplaceSolver(object):
         return self._update(conditionType,dir)
 
     def _setRhs(self,conditionType,direction):
-        if conditionType == 'Dirichlet':
-            self.rhs = zeros([self.N,self.M])
-            self.rhs[0,:] =- self.bc[0,1:-1]
-            self.rhs[-1,:] =- self.bc[-1,1:-1]
-            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
-            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
-            self.rhs = self.rhs/self.dx**2
-        elif conditionType == 'Neumann':
-            self.rhs = zeros([self.N,self.M])
+        self.rhs = zeros([self.N, self.M])
+        if conditionType == 'Neumann':
             if direction == 'east':
                 pass
             elif direction =='north':
@@ -49,13 +42,40 @@ class laplaceSolver(object):
                 self.bc = rot90(self.bc,2)
             elif direction =='south':
                 self.bc = rot90(self.bc,3)
-            self.rhs[0,:] = -self.bc[0,1:]/self.dx**2
-            self.rhs[-1,:] = -self.bc[-1,1:]/self.dx**2
-            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]/self.dx**2
-            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]/self.dx
-        else:
-            raise NameError('Condition must be either "Dirichlet" or "Neumann".')
-    
+            self.rhs[:,-1] = -self.bc[1:-1,-1]/self.dx
+        elif conditionType == 'Dirichlet':
+            self.rhs[:,-1] = -self.bc[1:-1,-1]/self.dx**2
+            
+        self.rhs[:,0] = -self.bc[1:-1,0]/self.dx**2
+        self.rhs[0,:] = self.rhs[0,:] -self.bc[0,1:]/self.dx**2
+        self.rhs[-1,:] = self.rhs[-1,:]-self.bc[-1,1:]/self.dx**2    
+            
+            
+            
+#        if conditionType == 'Dirichlet':
+#            self.rhs = zeros([self.N,self.M])
+#            self.rhs[0,:] =- self.bc[0,1:-1]
+#            self.rhs[-1,:] =- self.bc[-1,1:-1]
+#            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]
+#            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]
+#            self.rhs = self.rhs/self.dx**2
+#        elif conditionType == 'Neumann':
+#            self.rhs = zeros([self.N,self.M])
+#            if direction == 'east':
+#                pass
+#            elif direction =='north':
+#                self.bc=rot90(self.bc,1)
+#            elif direction =='west':
+#                self.bc = rot90(self.bc,2)
+#            elif direction =='south':
+#                self.bc = rot90(self.bc,3)
+#            self.rhs[0,:] = -self.bc[0,1:]/self.dx**2
+#            self.rhs[-1,:] = -self.bc[-1,1:]/self.dx**2
+#            self.rhs[:,0] = self.rhs[:,0]- self.bc[1:-1,0]/self.dx**2
+#            self.rhs[:,-1] = self.rhs[:,-1] - self.bc[1:-1,-1]/self.dx
+#        else:
+#            raise NameError('Condition must be either "Dirichlet" or "Neumann".')
+#    
     def _update(self,conditionType,direction):
         self.rhs = self.rhs.reshape(self.M*self.N)
         sub = ones([1,self.M-1])           
